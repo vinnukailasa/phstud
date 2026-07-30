@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Studio {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  email           String
+  phone           String?
+  address         String?
+  logoUrl         String?
+  licenseTier     String   @default("TRIAL")
+  licenseExpires  DateTime?
+  isActive        Boolean  @default(true)
+  primaryColor    String   @default("#6366f1")
+  accentColor     String   @default("#f59e0b")
+  surfaceColor    String   @default("#ffffff")
+  preEventReminderDays  Int  @default(7)
+  postEventReminderDays Int @default(3)
+  paymentReminderDays   Int @default(3)
+  upiId                 String?
+  payeeName             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users         User[]
+  clients       Client[]
+  packages      Package[]
+  events        Event[]
+  invoices      Invoice[]
+  photographers Photographer[]
+  reminders     Reminder[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("STUDIO_STAFF")
+  isActive  Boolean  @default(true)
+  studioId  String?
+  studio    Studio?  @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignedEvents EventPhotographer[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String
+  address   String?
+  notes     String?
+  studioId  String
+  studio    Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events   Event[]
+  invoices Invoice[]
+}
+
+model Package {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  items       String?
+  isActive    Boolean  @default(true)
+  studioId    String
+  studio      Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events Event[]
+}
+
+model Photographer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  specialty String?
+  isActive  Boolean  @default(true)
+  studioId  String
+  studio    Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments EventPhotographer[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  eventType   String
+  status      String   @default("SCHEDULED")
+  eventDate   DateTime
+  endDate     DateTime?
+  location    String?
+  locationLat Float?
+  locationLng Float?
+  notes       String?
+  price       Float?
+  pricingMode String?  // LUMP_SUM | PER_SUB_EVENT (main event only)
+  shareToken  String?  @unique
+  parentId    String?
+  parent      Event?   @relation("EventHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subEvents   Event[]  @relation("EventHierarchy")
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  packageId   String?
+  package     Package? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  studioId    String
+  studio      Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photographers EventPhotographer[]
+  invoices      Invoice[]
+  reminders     Reminder[]
+}
+
+model EventPhotographer {
+  id             String       @id @default(cuid())
+  eventId        String
+  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  photographerId String
+  photographer   Photographer @relation(fields: [photographerId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  role           String?      @default("lead")
+  createdAt      DateTime     @default(now())
+
+  @@unique([eventId, photographerId])
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String
+  subtotal      Float
+  discount      Float    @default(0)
+  tax           Float    @default(0)
+  total         Float
+  status        String   @default("DRAFT")
+  dueDate       DateTime?
+  notes         String?
+  shareToken    String?  @unique
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  studioId      String
+  studio        Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lineItems InvoiceLineItem[]
+  payments  Payment[]
+  reminders Reminder[]
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(cuid())
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Float
+  total       Float
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  paymentType   String
+  status        String   @default("COMPLETED")
+  paymentDate   DateTime @default(now())
+  reference     String?
+  notes         String?
+  emiNumber     Int?
+  totalEmis     Int?
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+}
+
+model Reminder {
+  id           String   @id @default(cuid())
+  type         String
+  title        String
+  message      String?
+  scheduledFor DateTime
+  isSent       Boolean  @default(false)
+  sentAt       DateTime?
+  eventId      String?
+  event        Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  invoiceId    String?
+  invoice      Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  studioId     String
+  studio       Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+}
