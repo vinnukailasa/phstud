@@ -26,7 +26,8 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity[...]
+    /* Fixed invalid placeholder: use concrete Tailwind utilities */
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50;
   }
 
   .btn-primary {
@@ -46,7 +47,8 @@
   }
 
   .input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors placeholder:text-slate-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-[...]
+    /* Fixed invalid placeholder: use focus:ring-2 focus:ring-brand */
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-colors placeholder:text-slate-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand;
   }
 
   .label {
