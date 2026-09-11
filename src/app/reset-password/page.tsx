@@ -1,13 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
@@ -34,4 +34,12 @@ export default function ResetPasswordPage() {
       {success ? <><h1 className="text-2xl font-bold text-slate-800">Password updated</h1><p className="mt-2 text-slate-500">Your password has been reset successfully.</p><Link href="/login" className="mt-6 block text-center font-medium text-brand hover:underline">Continue to sign in</Link></> : <><h1 className="text-2xl font-bold text-slate-800">Create a new password</h1><p className="mt-2 text-slate-500">Use at least 8 characters and include a number.</p><form onSubmit={handleSubmit} className="mt-8 space-y-5"><Input id="password" label="New password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} /><Input id="confirmation" label="Confirm password" type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required minLength={8} />{error && <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}<Button type="submit" loading={loading} disabled={!token} className="w-full">Reset password</Button></form></>}
     </div>
   </main>;
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-slate-50 px-6" aria-busy="true" />}> 
+      <ResetPasswordForm />
+    </Suspense>
+  );
 }
