@@ -88,7 +88,7 @@ export function PhotographerPicker({
               className={cn(
                 "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
                 selected
-                  ? "border-brand bg-brand/10 text-brand"
+                  ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
                   : busy
                     ? "border-amber-200 bg-amber-50 text-amber-800"
                     : "border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50"

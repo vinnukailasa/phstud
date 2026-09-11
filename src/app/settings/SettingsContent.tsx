@@ -14,6 +14,10 @@ interface Studio {
   payeeName: string | null;
   primaryColor: string;
   accentColor: string;
+  fontFamily: string;
+  fontStyle: "normal" | "italic";
+  logoPosition: "left" | "center" | "right";
+  socialLinks: Record<string, string> | null;
   preEventReminderDays: number;
   postEventReminderDays: number;
   paymentReminderDays: number;
@@ -53,6 +57,10 @@ export default function SettingsContent() {
         payeeName: studio.payeeName,
         primaryColor: studio.primaryColor,
         accentColor: studio.accentColor,
+        fontFamily: studio.fontFamily,
+        fontStyle: studio.fontStyle,
+        logoPosition: studio.logoPosition,
+        socialLinks: studio.socialLinks,
         preEventReminderDays: studio.preEventReminderDays,
         postEventReminderDays: studio.postEventReminderDays,
         paymentReminderDays: studio.paymentReminderDays,
@@ -103,6 +111,27 @@ export default function SettingsContent() {
                 <Input value={studio.accentColor} onChange={(e) => setStudio({ ...studio, accentColor: e.target.value })} />
               </div>
             </div>
+          </div>
+        </Card>
+
+        <Card title="Invoice Branding">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="Font Family" value={studio.fontFamily} onChange={(e) => setStudio({ ...studio, fontFamily: e.target.value })} />
+            <label className="label">Font Style
+              <select className="input" value={studio.fontStyle} onChange={(e) => setStudio({ ...studio, fontStyle: e.target.value as "normal" | "italic" })}>
+                <option value="normal">Normal</option><option value="italic">Italic</option>
+              </select>
+            </label>
+            <label className="label">Logo Position
+              <select className="input" value={studio.logoPosition} onChange={(e) => setStudio({ ...studio, logoPosition: e.target.value as "left" | "center" | "right" })}>
+                <option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
+              </select>
+            </label>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {[["instagram", "Instagram URL"], ["youtube", "YouTube URL"], ["website", "Website URL"]].map(([key, label]) => (
+              <Input key={key} label={label} type="url" value={studio.socialLinks?.[key] || ""} onChange={(e) => setStudio({ ...studio, socialLinks: { ...(studio.socialLinks || {}), [key]: e.target.value } })} />
+            ))}
           </div>
         </Card>
 

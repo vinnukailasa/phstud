@@ -12,6 +12,7 @@ const invoiceSchema = z.object({
   discount: z.number().min(0).default(0),
   tax: z.number().min(0).default(0),
   notes: z.string().optional(),
+  showSubEvents: z.boolean().default(false),
   lineItems: z.array(
     z.object({
       description: z.string(),
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
         status: "SENT",
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         notes: data.notes,
+        showSubEvents: data.showSubEvents,
         clientId: data.clientId,
         eventId: data.eventId,
         studioId: studio.id,

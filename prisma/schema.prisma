@@ -22,6 +22,10 @@ model Studio {
   primaryColor    String   @default("#6366f1")
   accentColor     String   @default("#f59e0b")
   surfaceColor    String   @default("#ffffff")
+  fontFamily      String   @default("Inter")
+  fontStyle       String   @default("normal")
+  logoPosition    String   @default("left")
+  socialLinks     Json?
   preEventReminderDays  Int  @default(7)
   postEventReminderDays Int @default(3)
   paymentReminderDays   Int @default(3)
@@ -169,6 +173,7 @@ model Invoice {
   status        String   @default("DRAFT")
   dueDate       DateTime?
   notes         String?
+  showSubEvents Boolean  @default(false)
   shareToken    String?  @unique
   clientId      String
   client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)

@@ -36,10 +36,8 @@ interface BookingEditModalProps {
   onSaved: () => void;
 }
 
-function toLocalDatetime(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function toLocalDate(iso: string) {
+  return new Date(iso).toISOString().slice(0, 10);
 }
 
 export function BookingEditModal({ bookingId, clients, onClose, onSaved }: BookingEditModalProps) {
@@ -71,7 +69,7 @@ export function BookingEditModal({ bookingId, clients, onClose, onSaved }: Booki
         setMainEvent({
           title: b.title,
           eventType: b.eventType,
-          eventDate: toLocalDatetime(b.eventDate),
+          eventDate: toLocalDate(b.eventDate),
           location: b.location || "",
           lumpSumPrice: b.price != null ? String(b.price) : "",
           photographerIds: b.photographers?.map((p: { photographer: { id: string } }) => p.photographer.id) ?? [],
@@ -92,7 +90,7 @@ export function BookingEditModal({ bookingId, clients, onClose, onSaved }: Booki
             id: s.id,
             title: s.title,
             eventType: s.eventType,
-            eventDate: toLocalDatetime(s.eventDate),
+            eventDate: toLocalDate(s.eventDate),
             location: s.location || "",
             price: s.price != null ? String(s.price) : "",
             photographerIds: s.photographers?.map((p) => p.photographer.id) ?? [],
@@ -218,7 +216,7 @@ export function BookingEditModal({ bookingId, clients, onClose, onSaved }: Booki
         <div className="grid gap-3 sm:grid-cols-2">
           <Input label="Booking Title" value={mainEvent.title} onChange={(e) => setMainEvent({ ...mainEvent, title: e.target.value })} required />
           <Select label="Type" options={eventTypes} value={mainEvent.eventType} onChange={(e) => setMainEvent({ ...mainEvent, eventType: e.target.value })} />
-          <Input label="Primary Date" type="datetime-local" value={mainEvent.eventDate} onChange={(e) => setMainEvent({ ...mainEvent, eventDate: e.target.value })} required />
+          <Input label="Primary Date" type="date" value={mainEvent.eventDate} onChange={(e) => setMainEvent({ ...mainEvent, eventDate: e.target.value })} required />
           <Input label="Location" value={mainEvent.location} onChange={(e) => setMainEvent({ ...mainEvent, location: e.target.value })} />
         </div>
 
@@ -263,7 +261,7 @@ export function BookingEditModal({ bookingId, clients, onClose, onSaved }: Booki
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Input label="Title" value={sub.title} onChange={(e) => { const n = [...subEvents]; n[idx] = { ...sub, title: e.target.value }; setSubEvents(n); }} />
-              <Input label="Date" type="datetime-local" value={sub.eventDate} onChange={(e) => { const n = [...subEvents]; n[idx] = { ...sub, eventDate: e.target.value }; setSubEvents(n); }} />
+              <Input label="Date" type="date" value={sub.eventDate} onChange={(e) => { const n = [...subEvents]; n[idx] = { ...sub, eventDate: e.target.value }; setSubEvents(n); }} />
               {pricingMode === "PER_SUB_EVENT" && (
                 <Input label="Price" type="number" value={sub.price} onChange={(e) => { const n = [...subEvents]; n[idx] = { ...sub, price: e.target.value }; setSubEvents(n); }} />
               )}
