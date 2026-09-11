@@ -21,6 +21,7 @@ interface PrintData {
     paid: number;
     balance: number;
     lineItems: { description: string; total: number }[];
+    showSubEvents?: boolean;
     payments: { paymentType: string; amount: number; paymentDate: string }[];
   };
   client: { name: string; phone: string; email?: string | null };
@@ -51,6 +52,7 @@ export function PrintableInvoice({ token, invoiceId }: { token?: string; invoice
               paid: d.invoice.paid,
               balance: d.invoice.balance,
               lineItems: d.invoice.lineItems,
+              showSubEvents: d.invoice.showSubEvents,
               payments: d.invoice.payments,
             },
             client: d.client,
@@ -81,6 +83,7 @@ export function PrintableInvoice({ token, invoiceId }: { token?: string; invoice
               paid,
               balance: d.balance ?? d.total - paid,
               lineItems: d.lineItems,
+              showSubEvents: d.showSubEvents,
               payments: d.payments.filter((p: { status: string }) => p.status === "COMPLETED"),
             },
             client: d.client,
@@ -126,7 +129,10 @@ export function PrintableInvoice({ token, invoiceId }: { token?: string; invoice
       {booking && (
         <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm">
           <p className="font-medium">{booking.title}</p>
-          <p className="text-slate-600">{formatDateTime(booking.eventDate)}</p>
+          <p className="text-slate-600">{formatDate(booking.eventDate)}</p>
+          {invoice.showSubEvents && "subEvents" in booking && Array.isArray((booking as { subEvents?: { title: string }[] }).subEvents) && (
+            <p className="text-slate-600">{(booking as { subEvents: { title: string }[] }).subEvents.map((event) => event.title).join(", ")}</p>
+          )}
           {booking.location && <p className="text-slate-600">{booking.location}</p>}
         </div>
       )}

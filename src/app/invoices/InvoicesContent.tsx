@@ -22,11 +22,13 @@ interface Invoice {
 
 interface Client { id: string; name: string }
 interface Package { id: string; name: string; price: number }
+interface EventOption { id: string; title: string; parentId: string | null }
 
 export default function InvoicesContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
+  const [events, setEvents] = useState<EventOption[]>([]);
   const [createModal, setCreateModal] = useState(false);
   const [payModal, setPayModal] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,8 @@ export default function InvoicesContent() {
     description: "",
     amount: "",
     dueDate: "",
+    eventId: "",
+    showSubEvents: false,
   });
 
   const [payForm, setPayForm] = useState({
@@ -51,10 +55,12 @@ export default function InvoicesContent() {
       fetch("/api/invoices").then((r) => r.json()),
       fetch("/api/clients").then((r) => r.json()),
       fetch("/api/packages").then((r) => r.json()),
-    ]).then(([inv, cl, pk]) => {
+      fetch("/api/events").then((r) => r.json()),
+    ]).then(([inv, cl, pk, ev]) => {
       setInvoices(inv);
       setClients(cl);
       setPackages(pk);
+      setEvents(ev);
     });
   };
 
@@ -84,6 +90,8 @@ export default function InvoicesContent() {
       body: JSON.stringify({
         clientId: invoiceForm.clientId,
         dueDate: invoiceForm.dueDate || undefined,
+        eventId: invoiceForm.eventId || undefined,
+        showSubEvents: invoiceForm.showSubEvents,
         lineItems: [{
           description: invoiceForm.description,
           quantity: 1,
@@ -93,7 +101,7 @@ export default function InvoicesContent() {
     });
     if (res.ok) {
       setCreateModal(false);
-      setInvoiceForm({ clientId: "", description: "", amount: "", dueDate: "" });
+      setInvoiceForm({ clientId: "", description: "", amount: "", dueDate: "", eventId: "", showSubEvents: false });
       fetchData();
     }
     setLoading(false);
@@ -187,6 +195,8 @@ export default function InvoicesContent() {
             onChange={(e) => setInvoiceForm({ ...invoiceForm, clientId: e.target.value })}
             required
           />
+          <Select label="Main Event" options={[{ value: "", label: "No event" }, ...events.filter((event) => !event.parentId).map((event) => ({ value: event.id, label: event.title }))]} value={invoiceForm.eventId} onChange={(e) => setInvoiceForm({ ...invoiceForm, eventId: e.target.value })} />
+          {invoiceForm.eventId && <label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={invoiceForm.showSubEvents} onChange={(e) => setInvoiceForm({ ...invoiceForm, showSubEvents: e.target.checked })} /> Show sub-event titles on invoice</label>}
           <Input label="Description *" value={invoiceForm.description} onChange={(e) => setInvoiceForm({ ...invoiceForm, description: e.target.value })} required />
           <Input label="Amount (₹) *" type="number" value={invoiceForm.amount} onChange={(e) => setInvoiceForm({ ...invoiceForm, amount: e.target.value })} required />
           <Input label="Due Date" type="date" value={invoiceForm.dueDate} onChange={(e) => setInvoiceForm({ ...invoiceForm, dueDate: e.target.value })} />
