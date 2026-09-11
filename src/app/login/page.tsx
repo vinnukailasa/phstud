@@ -110,6 +110,11 @@ export default function LoginPage() {
             <Button type="submit" loading={loading} className="w-full">
               Sign In
             </Button>
+            <div className="text-right">
+              <a href="/forgot-password" className="text-sm font-medium text-brand hover:underline">
+                Forgot password?
+              </a>
+            </div>
           </form>
 
           <div className="mt-8 rounded-xl bg-slate-50 p-4 text-xs text-slate-500">
