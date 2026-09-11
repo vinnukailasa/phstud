@@ -29,12 +29,15 @@ export default function ForgotPasswordPage() {
     <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
       <div className="mb-8 flex items-center gap-2 text-brand"><Camera className="h-8 w-8" /><span className="text-2xl font-bold">PHStud</span></div>
       <h1 className="text-2xl font-bold text-slate-800">Forgot your password?</h1>
-      <p className="mt-2 text-slate-500">Enter your account email and we&apos;ll help you reset your password.</p>
+      <p className="mt-2 text-slate-500">Enter your account email and we&apos;ll generate a temporary reset link.</p>
+      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        Email delivery is not configured yet. Use the temporary link below for testing only; connect an email provider before production use.
+      </div>
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <Input id="email" label="Email" type="email" placeholder="you@studio.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
         {error && <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
         {message && <div role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</div>}
-        {devResetUrl && <a href={devResetUrl} className="block break-all rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 underline">Open development reset link</a>}
+        {devResetUrl && <a href={devResetUrl} className="block break-all rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 underline">Open temporary password reset link</a>}
         <Button type="submit" loading={loading} className="w-full">Send reset link</Button>
       </form>
       <Link href="/login" className="mt-6 block text-center text-sm font-medium text-brand hover:underline">Back to sign in</Link>

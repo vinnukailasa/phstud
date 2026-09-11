@@ -19,9 +19,6 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !user.isActive) return NextResponse.json({ message: genericMessage });
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json({ error: "Password reset email delivery is not configured." }, { status: 503 });
-    }
 
     const { rawToken, tokenHash } = createResetToken();
     await prisma.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } });
