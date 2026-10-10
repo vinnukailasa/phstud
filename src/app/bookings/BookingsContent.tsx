@@ -95,7 +95,7 @@ export default function BookingsContent() {
   const [studioName, setStudioName] = useState("Photo Studio");
 
   const [clientId, setClientId] = useState("");
-  const [newClient, setNewClient] = useState({ name: "", phone: "", email: "" });
+  const [newClient, setNewClient] = useState({ name: "", phone: "" });
   const [pricingMode, setPricingMode] = useState<"LUMP_SUM" | "PER_SUB_EVENT">("LUMP_SUM");
   const [mainEvent, setMainEvent] = useState({
     title: "",
@@ -105,6 +105,7 @@ export default function BookingsContent() {
     lumpSumPrice: "",
     photographerIds: [] as string[],
     notes: "",
+    side: "BRIDE" as "BRIDE" | "GROOM" | "BOTH",
   });
   const [subEvents, setSubEvents] = useState<SubEventForm[]>([emptySubEvent()]);
   const [dueDate, setDueDate] = useState("");
@@ -149,7 +150,7 @@ export default function BookingsContent() {
       setClients((prev) => [client, ...prev]);
       setClientId(client.id);
       setClientModal(false);
-      setNewClient({ name: "", phone: "", email: "" });
+      setNewClient({ name: "", phone: "" });
     }
   };
 
@@ -158,11 +159,14 @@ export default function BookingsContent() {
     setError("");
     setLoading(true);
 
+    const submitter = (e.nativeEvent as SubmitEvent).submitter;
+    const saveStatus = submitter instanceof HTMLButtonElement ? (submitter.value || "SCHEDULED") : "SCHEDULED";
     const payload = {
       clientId: clientId || undefined,
       mainEvent: {
-        title: mainEvent.title,
+        title: mainEvent.title || EVENT_TYPE_LABELS[mainEvent.eventType] || 'Booking',
         eventType: mainEvent.eventType,
+        side: mainEvent.side,
         eventDate: mainEvent.eventDate,
         location: mainEvent.location || undefined,
         pricingMode,
@@ -181,6 +185,7 @@ export default function BookingsContent() {
           photographerIds: s.photographerIds,
         })),
       dueDate: dueDate || undefined,
+      status: saveStatus,
     };
 
     const res = await fetch("/api/bookings", {
@@ -198,7 +203,7 @@ export default function BookingsContent() {
 
     setShowForm(false);
     setClientId("");
-    setMainEvent({ title: "", eventType: "WEDDING", eventDate: "", location: "", lumpSumPrice: "", photographerIds: [], notes: "" });
+    setMainEvent({ title: "", eventType: "WEDDING", eventDate: "", location: "", lumpSumPrice: "", photographerIds: [], notes: "", side: "BRIDE" });
     setSubEvents([emptySubEvent()]);
     setDueDate("");
     fetchData();
@@ -245,22 +250,15 @@ export default function BookingsContent() {
           {/* Step 2: Main Event */}
           <Card title="2. Main Event">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="Booking Title *"
-                placeholder="e.g. Raj & Priya Wedding"
-                value={mainEvent.title}
-                onChange={(e) => setMainEvent({ ...mainEvent, title: e.target.value })}
-                required
-              />
               <Select
-                label="Event Type"
+                label="Main Event"
                 options={eventTypes}
                 value={mainEvent.eventType}
                 onChange={(e) => setMainEvent({ ...mainEvent, eventType: e.target.value })}
               />
               <Input
                 label="Primary Date *"
-                type="datetime-local"
+                type="date"
                 value={mainEvent.eventDate}
                 onChange={(e) => setMainEvent({ ...mainEvent, eventDate: e.target.value })}
                 required
@@ -271,6 +269,11 @@ export default function BookingsContent() {
                 value={mainEvent.location}
                 onChange={(e) => setMainEvent({ ...mainEvent, location: e.target.value })}
               />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="Event side">
+              {([['BRIDE', 'Bride Side'], ['GROOM', 'Groom Side'], ['BOTH', 'Both Side']] as const).map(([value, label]) => (
+                <button key={value} type="button" onClick={() => setMainEvent({ ...mainEvent, side: value })} className={`rounded-lg px-3 py-2 text-sm ${mainEvent.side === value ? 'bg-brand text-white' : 'bg-slate-100 text-slate-600'}`}>{label}</button>
+              ))}
             </div>
             {photographers.length > 0 && (
               <div className="mt-4">
@@ -334,7 +337,7 @@ export default function BookingsContent() {
                     />
                     <Input
                       label="Date"
-                      type="datetime-local"
+                      type="date"
                       value={sub.eventDate}
                       onChange={(e) => {
                         const next = [...subEvents];
@@ -446,8 +449,11 @@ export default function BookingsContent() {
             <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>
               Cancel
             </Button>
-            <Button type="submit" loading={loading}>
+            <Button type="submit" loading={loading} name="saveMode" value="SCHEDULED">
               Create Booking & Invoice
+            </Button>
+            <Button type="submit" variant="secondary" loading={loading} name="saveMode" value="DRAFT">
+              Save Draft Booking
             </Button>
           </div>
         </form>
@@ -516,7 +522,7 @@ export default function BookingsContent() {
                             href={`/invoice-tracker?invoice=${b.invoiceSummary.id}`}
                             className="text-sm font-medium text-brand hover:underline"
                           >
-                            Track Payments →
+                            Record Payment →
                           </Link>
                         )}
                       </div>
@@ -592,7 +598,7 @@ export default function BookingsContent() {
         <form onSubmit={handleCreateClient} className="space-y-4">
           <Input label="Name *" value={newClient.name} onChange={(e) => setNewClient({ ...newClient, name: e.target.value })} required />
           <Input label="Phone *" value={newClient.phone} onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })} required />
-          <Input label="Email" type="email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })} />
+
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => setClientModal(false)}>Cancel</Button>
             <Button type="submit">Add & Select</Button>

@@ -6,17 +6,17 @@ import { createSession } from "@/lib/auth";
 import type { UserRole } from "@/lib/types";
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  identifier: z.string().min(1),
   password: z.string().min(1),
 });
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = loginSchema.parse(body);
+    const { identifier, password } = loginSchema.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ email: identifier }, { username: identifier }] },
       include: { studio: true },
     });
 

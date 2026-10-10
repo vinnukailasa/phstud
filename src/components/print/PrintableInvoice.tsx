@@ -190,6 +190,8 @@ export function PrintableInvoice({ token, invoiceId }: { token?: string; invoice
       )}
 
       <footer className="mt-8 border-t pt-4 text-center text-xs text-slate-400">
+        90% of the Payment should be done before the Main Event. Thank you for your cooperation.
+        <br />
         Thank you for your business · {studio.name}
       </footer>
     </div>

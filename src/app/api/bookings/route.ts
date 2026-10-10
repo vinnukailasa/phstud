@@ -37,10 +37,12 @@ const bookingSchema = z.object({
     lumpSumPrice: z.number().min(0).optional(),
     photographerIds: z.array(z.string()).optional(),
     notes: z.string().optional(),
+    side: z.enum(["BRIDE", "GROOM", "BOTH"]).optional(),
   }),
   subEvents: z.array(subEventSchema).default([]),
   dueDate: z.string().optional(),
   discount: z.number().min(0).default(0),
+  status: z.enum(["DRAFT", "SCHEDULED"]).default("SCHEDULED"),
 });
 
 const bookingInclude = {
@@ -152,6 +154,8 @@ export async function POST(request: Request) {
           location: mainEvent.location,
           notes: mainEvent.notes,
           pricingMode: mainEvent.pricingMode,
+          side: mainEvent.side,
+          status: data.status,
           price: mainEvent.pricingMode === "LUMP_SUM" ? mainEvent.lumpSumPrice : null,
           shareToken: generateShareToken(),
           clientId: client!.id,

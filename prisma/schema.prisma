@@ -46,6 +46,7 @@ model Studio {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  username  String?  @unique
   phone     String?
   password  String
   name      String
@@ -132,6 +133,7 @@ model Event {
   notes       String?
   price       Float?
   pricingMode String?  // LUMP_SUM | PER_SUB_EVENT (main event only)
+  side        String?  // BRIDE | GROOM | BOTH
   shareToken  String?  @unique
   parentId    String?
   parent      Event?   @relation("EventHierarchy", fields: [parentId], references: [id], onDelete: Cascade)

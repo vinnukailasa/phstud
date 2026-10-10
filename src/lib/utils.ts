@@ -14,9 +14,9 @@ export function formatCurrency(amount: number, currency = "INR") {
 }
 
 export function formatDate(date: Date | string) {
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
   }).format(new Date(date));
 }
@@ -61,10 +61,10 @@ export const EVENT_STATUS_LABELS: Record<string, string> = {
 };
 
 export const PAYMENT_TYPE_LABELS: Record<string, string> = {
-  ADVANCE: "Advance",
-  PARTIAL: "Part Payment",
-  FULL: "Full Payment",
-  EMI: "EMI Installment",
+  ADVANCE: "Booking advance",
+  PARTIAL: "Part payment",
+  FULL: "Final payment",
+  EMI: "EMI installment",
 };
 
 export const LICENSE_TIER_LABELS: Record<string, string> = {
