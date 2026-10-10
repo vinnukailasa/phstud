@@ -88,7 +88,7 @@ export default function LoginPage() {
               id="identifier"
               label="Email or username"
               type="text"
-              placeholder="you@studio.com or username"
+              placeholder="you@example.com or username"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
