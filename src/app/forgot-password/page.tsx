@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [devResetUrl, setDevResetUrl] = useState("");
@@ -18,7 +17,7 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     setLoading(true); setError(""); setMessage(""); setDevResetUrl("");
     try {
-      const response = await fetch("/api/auth/forgot-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, phone }) });
+      const response = await fetch("/api/auth/forgot-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone }) });
       const data = await response.json();
       if (!response.ok) { setError(data.error || "Unable to process your request."); return; }
       setMessage(data.message);
@@ -30,9 +29,8 @@ export default function ForgotPasswordPage() {
     <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
       <div className="mb-8 flex items-center gap-2 text-brand"><Camera className="h-8 w-8" /><span className="text-2xl font-bold">PHStud</span></div>
       <h1 className="text-2xl font-bold text-slate-800">Forgot your password?</h1>
-      <p className="mt-2 text-slate-500">Enter your account email and WhatsApp number to receive a verification code.</p>
+      <p className="mt-2 text-slate-500">Enter your WhatsApp number to receive a verification code.</p>
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        <Input id="email" label="Email" type="email" placeholder="you@studio.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
         <Input id="phone" label="WhatsApp number" type="tel" placeholder="+919876543210" value={phone} onChange={(event) => setPhone(event.target.value)} required />
         {error && <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
         {message && <div role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</div>}

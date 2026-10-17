@@ -6,13 +6,12 @@ import {
   createVerificationCode,
   getResetUrl,
   logDevelopmentResetLink,
-  normalizeEmail,
   normalizePhone,
   isValidPhone,
   PASSWORD_RESET_TTL_MS,
 } from "@/lib/password-reset";
 
-const schema = z.object({ email: z.string().email(), phone: z.string().min(8) });
+const schema = z.object({ phone: z.string().min(8) });
 const genericMessage = "If the account details match, a verification code has been sent on WhatsApp.";
 
 function getTwilioClient() {
@@ -23,10 +22,9 @@ function getTwilioClient() {
 
 export async function POST(request: Request) {
   try {
-    const { email: rawEmail, phone: rawPhone } = schema.parse(await request.json());
-    const email = normalizeEmail(rawEmail);
+    const { phone: rawPhone } = schema.parse(await request.json());
     const phone = normalizePhone(rawPhone);
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findFirst({ where: { phone } });
 
     if (!user || !user.isActive || !user.phone || !isValidPhone(phone) || user.phone !== phone) {
       return NextResponse.json({ message: genericMessage });
@@ -47,10 +45,10 @@ export async function POST(request: Request) {
       to: `whatsapp:${phone}`,
       body: `Your PHStud password reset verification code is ${code}. It expires in 30 minutes.`,
     });
-    logDevelopmentResetLink(email, resetUrl);
+    logDevelopmentResetLink(phone, resetUrl);
     return NextResponse.json({ message: genericMessage, resetUrl: "/reset-password" });
   } catch (error) {
-    if (error instanceof z.ZodError) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    if (error instanceof z.ZodError) return NextResponse.json({ error: "Enter a valid WhatsApp number." }, { status: 400 });
     return NextResponse.json({ error: "Unable to process your request." }, { status: 500 });
   }
 }
